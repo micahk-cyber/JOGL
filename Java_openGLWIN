@@ -1,0 +1,59 @@
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
+
+import org.lwjgl.opengl.GL;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        // ---------------------------
+        // 1. Initialize GLFW
+        // ---------------------------
+        if (!glfwInit()) {
+            throw new IllegalStateException("GLFW initialization failed!");
+        }
+
+        // Request OpenGL 3.3 core
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+        // ---------------------------
+        // 2. Create a window
+        // ---------------------------
+        long window = glfwCreateWindow(800, 600, "OpenGL Triangle", 0, 0);
+        if (window == 0) {
+            throw new RuntimeException("Failed to create GLFW window!");
+        }
+
+        glfwMakeContextCurrent(window);  // Bind OpenGL to this window
+        GL.createCapabilities();         // Load OpenGL functions
+
+        // Set background color (RGBA)
+        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+
+        // ---------------------------
+        // 3. Triangle vertex data
+        // ---------------------------
+        float[] vertices = {
+            -0.5f, -0.5f, 0.0f,  // bottom-left
+             0.5f, -0.5f, 0.0f,  // bottom-right
+             0.0f,  0.5f, 0.0f   // top
+        };
+
+        // ---------------------------
+        // 4. Create VAO and VBO
+        // ---------------------------
+        int vao = glGenVertexArrays();
+        glBindVertexArray(vao);
+
+        int vbo = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        // Upload vertex data to GPU
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+
+        // Describe how vertex da
