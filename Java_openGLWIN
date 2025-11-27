@@ -56,4 +56,95 @@ public class Main {
         // Upload vertex data to GPU
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
 
-        // Describe how vertex da
+        // Describe how vertex data is laid out
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * 4, 0);
+        glEnableVertexAttribArray(0);
+
+        // ---------------------------
+        // 5. Create shaders
+        // ---------------------------
+        String vertexShaderSource =
+            "#version 330 core\n" +
+            "layout(location = 0) in vec3 aPos;\n" +
+            "void main() {\n" +
+            "   gl_Position = vec4(aPos, 1.0);\n" +
+            "}";
+
+        String fragmentShaderSource =
+            "#version 330 core\n" +
+            "out vec4 FragColor;\n" +
+            "void main() {\n" +
+            "   FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n" + // red color
+            "}";
+
+        // Compile vertex shader
+        int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertexShader, vertexShaderSource);
+        glCompileShader(vertexShader);
+        checkShaderCompile(vertexShader, "VERTEX");
+
+        // Compile fragment shader
+        int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragmentShader, fragmentShaderSource);
+        glCompileShader(fragmentShader);
+        checkShaderCompile(fragmentShader, "FRAGMENT");
+
+        // ---------------------------
+        // 6. Create shader program
+        // ---------------------------
+        int shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
+        checkProgramLink(shaderProgram);
+
+        // Delete shader objects (no longer needed)
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        // ---------------------------
+        // 7. Main render loop
+        // ---------------------------
+        while (!glfwWindowShouldClose(window)) {
+
+            glClear(GL_COLOR_BUFFER_BIT);  // Clear screen
+
+            glUseProgram(shaderProgram);   // Use our shader
+            glBindVertexArray(vao);        // Bind triangle data
+            glDrawArrays(GL_TRIANGLES, 0, 3); // Draw 3 vertices
+
+            glfwSwapBuffers(window); // Display frame
+            glfwPollEvents();        // Handle input
+        }
+
+        // ---------------------------
+        // 8. Clean up
+        // ---------------------------
+        glDeleteVertexArrays(vao);
+        glDeleteBuffers(vbo);
+        glDeleteProgram(shaderProgram);
+
+        glfwDestroyWindow(window);
+        glfwTerminate();
+    }
+
+    // ---------------------------
+    // Helper: Check shader compile errors
+    // ---------------------------
+    static void checkShaderCompile(int shader, String type) {
+        if (glGetShaderi(shader, GL_COMPILE_STATUS) == GL_FALSE) {
+            System.out.println(type + " SHADER COMPILATION FAILED:");
+            System.out.println(glGetShaderInfoLog(shader));
+        }
+    }
+
+    // ---------------------------
+    // Helper: Check program link errors
+    // ---------------------------
+    static void checkProgramLink(int program) {
+        if (glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) {
+            System.out.println("PROGRAM LINKING FAILED:");
+            System.out.println(glGetProgramInfoLog(program));
+        }
+    }
+}
